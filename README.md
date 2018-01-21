@@ -1,24 +1,18 @@
-# bs-puppeteer
+# Basic Reason Template
 
-BuckleScript bindings to the GoogleChrome/puppeteer (Headless Chrome Node API)
+Hello! This project allows you to quickly get started with Reason and BuckleScript. If you wanted a more sophisticated version, try the `react` template (`bsb -theme react -init .`).
 
-## Installation
-
-```shell
-npm install bs-puppeteer
+# Build
+```
+npm run build
 ```
 
-Then add `bs-puppeteer` to `bs-dependencies` in your `bsconfig.json`. A minimal example:
+# Build + Watch
 
-```json
-{
-  "name": "my-thing",
-  "sources": "src",
-  "bs-dependencies": ["bs-puppeteer"]
-}
+```
+npm run watch
 ```
 
-## Usage
 
-`Not yet`
-
+# Editor
+If you use `vscode`, Press `Windows + Shift + B` it will build automatically
