@@ -2,6 +2,7 @@
 'use strict';
 
 
-console.log("Hello, BuckleScript and Reason!");
+var Browser = /* module */[];
 
-/*  Not a pure module */
+exports.Browser = Browser;
+/* No side effect */

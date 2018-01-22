@@ -4,6 +4,7 @@
   "scripts": {
     "build": "bsb -make-world",
     "start": "bsb -make-world -w",
+    "test": "jest --watch",
     "clean": "bsb -clean-world"
   },
   "keywords": [
@@ -24,6 +25,8 @@
   "author": "Jih-Chi, Lee <achi@987.tw>",
   "license": "MIT",
   "devDependencies": {
-    "bs-platform": "^2.1.0"
+    "@glennsl/bs-jest": "^0.3.3",
+    "bs-platform": "^2.1.0",
+    "puppeteer": "^1.0.0"
   }
 }
