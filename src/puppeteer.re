@@ -1,6 +1,28 @@
+module Target = {
+  type t;
+};
+
+module Page = {
+  type t;
+};
+
 module Browser = {
   type t;
   [@bs.send] external close : (t, unit) => Js.Promise.t(unit) = "";
+  [@bs.send.pipe : t] external on : (
+    [@bs.string] [
+    | `disconnected(unit => unit)
+    | `targetchanged(Target.t => unit)
+    | `targetcreated(Target.t => unit)
+    | `targetdestroyed(Target.t => unit)
+    ]) => Js.Promise.t(unit) = "";
+  [@bs.send] external disconnect : (t, unit) => unit = "";
+  [@bs.send] external newPage : (t, unit) => Js.Promise.t(Page.t) = "";
+  [@bs.send] external pages : (t, unit) => Js.Promise.t(array(Page.t)) = "";
+  [@bs.send] external targets : (t, unit) => array(Page.t) = "";
+  [@bs.send] external userAgent : (t, unit) => Js.Promise.t(string) = "";
+  [@bs.send] external version : (t, unit) => Js.Promise.t(string) = "";
+  [@bs.send] external wsEndpoint : (t, unit) => string = "";
 };
 
 module Puppeteer = {
