@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "scripts": {
     "build": "bsb -make-world",
+    "clean": "bsb -clean-world",
     "start": "bsb -make-world -w",
-    "test": "jest --watch",
-    "clean": "bsb -clean-world"
+    "test": "jest --watch"
   },
   "keywords": [
     "puppeteer",
