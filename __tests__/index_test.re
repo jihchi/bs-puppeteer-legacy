@@ -244,12 +244,26 @@ makeTestAsync(
 );
 
 makeTestAsync(
-  ~name="Page.click(): This method fetches an element with selector, scrolls it into view if needed, and then uses page.mouse to click in the center of the element. If there's no element matching selector, the method throws an error.",
+  ~name=
+    "Page.click(): This method fetches an element with selector, scrolls it into view if needed, and then uses page.mouse to click in the center of the element. If there's no element matching selector, the method throws an error.",
   ~getData=
     browser =>
       Js.Promise.(
         Puppeteer.Browser.newPage(browser, ())
-        |> then_(page => Puppeteer.Page.click(page, "body",Js.undefined))
+        |> then_(page => Puppeteer.Page.click(page, "body", Js.undefined))
       ),
   ~assertData=() => pass |> Js.Promise.resolve
+);
+
+makeTestAsync(
+  ~name=
+    "Page.cookies(): If no URLs are specified, this method returns cookies for the current page URL. If URLs are specified, only cookies for those URLs are returned.",
+  ~getData=
+    browser =>
+      Js.Promise.(
+        Puppeteer.Browser.newPage(browser, ())
+        |> then_(page => Puppeteer.Page.cookies(page, [||]))
+      ),
+  ~assertData=
+    cookies => expect(cookies) |> toHaveLength(0) |> Js.Promise.resolve
 );
