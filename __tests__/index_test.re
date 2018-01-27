@@ -231,3 +231,14 @@ makeTestAsync(
       ),
   ~assertData=() => pass |> Js.Promise.resolve
 );
+
+makeTestAsync(
+  ~name="Page.bringToFront(): Brings page to front (activates tab).",
+  ~getData=
+    browser =>
+      Js.Promise.(
+        Puppeteer.Browser.newPage(browser, ())
+        |> then_(page => Puppeteer.Page.bringToFront(page, ()))
+      ),
+  ~assertData=() => pass |> Js.Promise.resolve
+);
