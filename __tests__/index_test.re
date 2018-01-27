@@ -146,3 +146,16 @@ makeTestAsync(
       |> toBe("<html><head></head><body></body></html>")
       |> Js.Promise.resolve
 );
+
+makeTestAsync(
+  ~name="Page.$x(): The method evluates the XPath expression.",
+  ~getData=
+    browser =>
+      Js.Promise.(
+        Puppeteer.Browser.newPage(browser, ())
+        |> then_(page => Puppeteer.Page.dollarX(page, "/html/body"))
+      ),
+  ~assertData=
+    elementHandles =>
+      expect(elementHandles) |> toHaveLength(1) |> Js.Promise.resolve
+);
