@@ -313,3 +313,15 @@ makeTestAsync(
          })
       |> Js.Promise.resolve
 );
+
+makeTestAsync(
+  ~name=
+    "Page.emulateMedia(): Changes the CSS media type of the page. The only allowed values are 'screen', 'print' and null. Passing null disables media emulation.",
+  ~getData=
+    browser =>
+      Js.Promise.(
+        Puppeteer.Browser.newPage(browser, ())
+        |> then_(page => Puppeteer.Page.emulateMedia(page, "print"))
+      ),
+  ~assertData=() => pass |> Js.Promise.resolve
+);

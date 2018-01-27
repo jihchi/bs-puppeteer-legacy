@@ -210,9 +210,7 @@ module Page = {
     ) =>
     Js.Promise.t(unit) =
     "";
-  [@bs.send]
-  external emulateMedia : (t, Js.Nullable.t(string)) => Js.Promise.t(unit) =
-    "";
+  [@bs.send] external emulateMedia : (t, string) => Js.Promise.t(unit) = "";
   [@bs.send]
   external evaluate :
     (t, unit => unit, [@bs.splice] array(args)) => Js.Promise.t(Js.Json.t) =
