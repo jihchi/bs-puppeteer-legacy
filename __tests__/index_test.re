@@ -325,3 +325,27 @@ makeTestAsync(
       ),
   ~assertData=() => pass |> Js.Promise.resolve
 );
+
+makeTestAsync(
+  ~name=
+    "Page.evaluate(): If the function, passed to the page.evaluate, returns a Promise, then page.evaluate would wait for the promise to resolve and return its value.",
+  ~getData=
+    browser =>
+      Js.Promise.(
+        Puppeteer.Browser.newPage(browser, ())
+        |> then_(page => {
+             let eval = [%raw
+               {| function () { return Promise.resolve("ok"); } |}
+             ];
+             Puppeteer.Page.evaluate(page, eval, [||]);
+           })
+      ),
+  ~assertData=
+    serializable =>
+      serializable
+      |> Js.Json.decodeString
+      |> Js.Option.getWithDefault("")
+      |> expect
+      |> toBe("ok")
+      |> Js.Promise.resolve
+);
