@@ -263,8 +263,7 @@ makeTestAsync(
 );
 
 makeTestAsync(
-  ~name=
-    "Page.deleteCookie()",
+  ~name="Page.deleteCookie()",
   ~getData=
     browser =>
       Js.Promise.(
@@ -272,4 +271,45 @@ makeTestAsync(
         |> then_(page => Puppeteer.Page.deleteCookie(page, [||]))
       ),
   ~assertData=() => pass |> Js.Promise.resolve
+);
+
+makeTestAsync(
+  ~name="Page.emulate(): Emulates given device metrics and user agent.",
+  ~getData=
+    browser =>
+      Js.Promise.(
+        Puppeteer.Browser.newPage(browser, ())
+        |> then_(page =>
+             all2((
+               Puppeteer.Page.emulate(
+                 page,
+                 {
+                   "viewport": {
+                     "width": 320,
+                     "height": 480,
+                     "deviceScaleFactor": 2,
+                     "isMobile": Js.true_,
+                     "hasTouch": Js.true_,
+                     "isLandscape": Js.true_
+                   },
+                   "userAgent": ""
+                 }
+               ),
+               resolve(page)
+             ))
+           )
+      ),
+  ~assertData=
+    (((), page)) =>
+      Puppeteer.Page.viewport(page, ())
+      |> expect
+      |> ExpectJs.toMatchObject({
+           "width": 320,
+           "height": 480,
+           "deviceScaleFactor": 2,
+           "isMobile": Js.true_,
+           "hasTouch": Js.true_,
+           "isLandscape": Js.true_
+         })
+      |> Js.Promise.resolve
 );

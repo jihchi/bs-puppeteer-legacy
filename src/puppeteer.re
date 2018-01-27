@@ -2,25 +2,25 @@ type puppeteerFunction = unit => Js.Promise.t(unit);
 
 type viewport = {
   .
-  width: int,
-  height: int,
-  deviceScaleFactor: int,
-  isMobile: Js.boolean,
-  hasTouch: Js.boolean,
-  isLandscape: Js.boolean
+  "width": int,
+  "height": int,
+  "deviceScaleFactor": int,
+  "isMobile": Js.boolean,
+  "hasTouch": Js.boolean,
+  "isLandscape": Js.boolean
 };
 
 type cookie = {
   .
-  name: string,
-  value: string,
-  domain: string,
-  path: string,
-  expires: float,
-  httpOnly: Js.boolean,
-  secure: Js.boolean,
-  session: Js.boolean,
-  sameSite: string
+  "name": string,
+  "value": string,
+  "domain": string,
+  "path": string,
+  "expires": float,
+  "httpOnly": Js.boolean,
+  "secure": Js.boolean,
+  "session": Js.boolean,
+  "sameSite": string
 };
 
 module Tracing = {
@@ -204,8 +204,8 @@ module Page = {
       t,
       {
         .
-        viewport: viewport,
-        userAgent: string
+        "viewport": viewport,
+        "userAgent": string
       }
     ) =>
     Js.Promise.t(unit) =
