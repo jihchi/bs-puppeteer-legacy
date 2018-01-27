@@ -56,7 +56,7 @@ module Coverage = {
 };
 
 module ElementHandle = {
-  type t;
+  type t = {. [@bs.meth] "toString": unit => string};
 };
 
 module Response = {
@@ -139,18 +139,25 @@ module Page = {
   external dollarX : (t, string) => Js.Promise.t(array(ElementHandle.t)) =
     "$x";
   [@bs.send]
-  external addScriptTag :
+  external _addScriptTag :
     (
       t,
       {
         .
-        url: string,
-        path: string,
-        content: string
+        "content": Js.undefined(string),
+        "path": Js.undefined(string),
+        "url": string
       }
     ) =>
     Js.Promise.t(ElementHandle.t) =
+    "addScriptTag";
+  [@bs.obj]
+  external makeAddScriptTagOptions :
+    (~url: string, ~path: string=?, ~content: string=?, unit) => _ =
     "";
+  let addScriptTag =
+      (~url: string, ~path: option(string)=?, ~content: option(string)=?, t) =>
+    _addScriptTag(t, makeAddScriptTagOptions(~url, ~path?, ~content?, ()));
   [@bs.send]
   external addStyleTag :
     (

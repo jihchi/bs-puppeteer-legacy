@@ -159,3 +159,25 @@ makeTestAsync(
     elementHandles =>
       expect(elementHandles) |> toHaveLength(1) |> Js.Promise.resolve
 );
+
+makeTestAsync(
+  ~name=
+    "Page.addScriptTag(): Adds a <script> tag into the page with the desired url or content.",
+  ~getData=
+    browser =>
+      Js.Promise.(
+        Puppeteer.Browser.newPage(browser, ())
+        |> then_(page =>
+             Puppeteer.Page.addScriptTag(
+               ~url=
+                 "https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js",
+               page
+             )
+           )
+      ),
+  ~assertData=
+    elementHandle =>
+      expect(elementHandle##toString())
+      |> toContainString("JSHandle@node")
+      |> Js.Promise.resolve
+);
