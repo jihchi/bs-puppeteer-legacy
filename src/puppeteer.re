@@ -133,7 +133,7 @@ module Page = {
     "$$eval";
   [@bs.send]
   external dollarEval :
-    (t, string, unit => unit, [@bs.splice] array(args)) => Js.Promise.t({..}) =
+    (t, string, unit => unit, [@bs.splice] array(args)) => Js.Promise.t('a) =
     "$eval";
   [@bs.send]
   external dollarX : (t, string) => Js.Promise.t(array(ElementHandle.t)) =

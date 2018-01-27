@@ -125,3 +125,24 @@ makeTestAsync(
   ~assertData=
     serializable => expect(serializable) |> toBe(2) |> Js.Promise.resolve
 );
+
+makeTestAsync(
+  ~name=
+    "Page.$eval(): This method runs document.querySelector within the page and passes it as the first argument to pageFunction.",
+  ~getData=
+    browser =>
+      Js.Promise.(
+        Puppeteer.Browser.newPage(browser, ())
+        |> then_(page => {
+             let eval = [%raw
+               {| function (element) { return element.outerHTML; } |}
+             ];
+             Puppeteer.Page.dollarEval(page, "html", eval, [||]);
+           })
+      ),
+  ~assertData=
+    serializable =>
+      expect(serializable)
+      |> toBe("<html><head></head><body></body></html>")
+      |> Js.Promise.resolve
+);
