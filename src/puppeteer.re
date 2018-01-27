@@ -178,12 +178,12 @@ module Page = {
     (
       t,
       string,
-      {
+      Js.undefined({
         .
-        button: string,
-        clickCount: int,
-        delay: int
-      }
+        "button": string,
+        "clickCount": int,
+        "delay": int
+      })
     ) =>
     Js.Promise.t(unit) =
     "";
