@@ -129,7 +129,7 @@ module Page = {
     "$$";
   [@bs.send]
   external dollarDollarEval :
-    (t, string, unit => unit, [@bs.splice] array(args)) => Js.Promise.t({..}) =
+    (t, string, unit => unit, [@bs.splice] array(args)) => Js.Promise.t('a) =
     "$$eval";
   [@bs.send]
   external dollarEval :
@@ -422,7 +422,7 @@ module Page = {
   external waitForSelector :
     (
       t,
-			string,
+      string,
       {
         .
         timeout: int,

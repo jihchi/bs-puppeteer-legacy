@@ -20,13 +20,17 @@ let makeTestAsync = (~name, ~getData, ~assertData) =>
     )
   );
 
-test("Puppeteer.defaultArgs(): The default flags that Chromium will be launched with.", () =>
+test(
+  "Puppeteer.defaultArgs(): The default flags that Chromium will be launched with.",
+  () =>
   expect(Puppeteer.defaultArgs(puppeteer, ())) |> toHaveLength(17)
 );
 
-test("Puppeteer.executablePath(): A path where Puppeteer expects to find bundled Chromium.", () =>
+test(
+  "Puppeteer.executablePath(): A path where Puppeteer expects to find bundled Chromium.",
+  () =>
   expect(Puppeteer.executablePath(puppeteer, ()))
-  |> toContainString("Chromium")
+  |> toContainString("chromium")
 );
 
 makeTestAsync(
@@ -48,7 +52,8 @@ makeTestAsync(
 );
 
 makeTestAsync(
-  ~name="Page.$(): The method runs document.querySelector within the page. (FAIL)",
+  ~name=
+    "Page.$(): The method runs document.querySelector within the page. (FAIL)",
   ~getData=
     browser =>
       Js.Promise.(
@@ -74,7 +79,8 @@ makeTestAsync(
 );
 
 makeTestAsync(
-  ~name="Page.content(): gets the full HTML contents of the page, including the doctype.",
+  ~name=
+    "Page.content(): gets the full HTML contents of the page, including the doctype.",
   ~getData=
     browser =>
       Js.Promise.(
@@ -83,18 +89,39 @@ makeTestAsync(
       ),
   ~assertData=
     content =>
-      expect(content) |> ExpectJs.toBe("<html><head></head><body></body></html>") |> Js.Promise.resolve
+      expect(content)
+      |> ExpectJs.toBe("<html><head></head><body></body></html>")
+      |> Js.Promise.resolve
 );
 
 makeTestAsync(
-  ~name="Page.$$(): The method runs document.querySelectorAll within the page.",
+  ~name=
+    "Page.$$(): The method runs document.querySelectorAll within the page.",
   ~getData=
     browser =>
       Js.Promise.(
         Puppeteer.Browser.newPage(browser, ())
-        |> then_(page => Puppeteer.Page.dollarDollar(page, "body,html"))
+        |> then_(page => Puppeteer.Page.dollarDollar(page, "html,body"))
       ),
   ~assertData=
     elementHandles =>
       expect(elementHandles) |> ExpectJs.toHaveLength(2) |> Js.Promise.resolve
+);
+
+makeTestAsync(
+  ~name=
+    "Page.$$eval(): This method runs document.querySelectorAll within the page and passes it as the first argument to pageFunction.",
+  ~getData=
+    browser =>
+      Js.Promise.(
+        Puppeteer.Browser.newPage(browser, ())
+        |> then_(page => {
+             let eval = [%raw
+               {| function (elements) { return elements.length; } |}
+             ];
+             Puppeteer.Page.dollarDollarEval(page, "html,body", eval, [||]);
+           })
+      ),
+  ~assertData=
+    serializable => expect(serializable) |> toBe(2) |> Js.Promise.resolve
 );
