@@ -93,6 +93,16 @@ module Page = {
     touchscreen: Touchscreen.t,
     tracing: Tracing.t
   };
+  type tagOptions = {
+    .
+    "content": Js.undefined(string),
+    "path": Js.undefined(string),
+    "url": string
+  };
+  [@bs.obj]
+  external makeTagOptions :
+    (~url: string, ~path: string=?, ~content: string=?, unit) => _ =
+    "";
   [@bs.send.pipe : t]
   external on :
     (
@@ -139,38 +149,17 @@ module Page = {
   external dollarX : (t, string) => Js.Promise.t(array(ElementHandle.t)) =
     "$x";
   [@bs.send]
-  external _addScriptTag :
-    (
-      t,
-      {
-        .
-        "content": Js.undefined(string),
-        "path": Js.undefined(string),
-        "url": string
-      }
-    ) =>
-    Js.Promise.t(ElementHandle.t) =
+  external _addScriptTag : (t, tagOptions) => Js.Promise.t(ElementHandle.t) =
     "addScriptTag";
-  [@bs.obj]
-  external makeAddScriptTagOptions :
-    (~url: string, ~path: string=?, ~content: string=?, unit) => _ =
-    "";
   let addScriptTag =
       (~url: string, ~path: option(string)=?, ~content: option(string)=?, t) =>
-    _addScriptTag(t, makeAddScriptTagOptions(~url, ~path?, ~content?, ()));
+    _addScriptTag(t, makeTagOptions(~url, ~path?, ~content?, ()));
   [@bs.send]
-  external addStyleTag :
-    (
-      t,
-      {
-        .
-        url: string,
-        path: string,
-        content: string
-      }
-    ) =>
-    Js.Promise.t(ElementHandle.t) =
-    "";
+  external _addStyleTag : (t, tagOptions) => Js.Promise.t(ElementHandle.t) =
+    "addStyleTag";
+  let addStyleTag =
+      (~url: string, ~path: option(string)=?, ~content: option(string)=?, t) =>
+    _addStyleTag(t, makeTagOptions(~url, ~path?, ~content?, ()));
   [@bs.send]
   external authenticate :
     (

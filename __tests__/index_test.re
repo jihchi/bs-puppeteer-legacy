@@ -181,3 +181,25 @@ makeTestAsync(
       |> toContainString("JSHandle@node")
       |> Js.Promise.resolve
 );
+
+makeTestAsync(
+  ~name=
+    "Page.addStyleTag(): Adds a <link rel=\"stylesheet\"> tag into the page with the desired url or a <style type=\"text/css\"> tag with the content.",
+  ~getData=
+    browser =>
+      Js.Promise.(
+        Puppeteer.Browser.newPage(browser, ())
+        |> then_(page =>
+             Puppeteer.Page.addStyleTag(
+               ~url=
+                 "https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0/css/bootstrap.min.css",
+               page
+             )
+           )
+      ),
+  ~assertData=
+    elementHandle =>
+      expect(elementHandle##toString())
+      |> toContainString("JSHandle@node")
+      |> Js.Promise.resolve
+);
