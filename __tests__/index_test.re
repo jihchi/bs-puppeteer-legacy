@@ -256,14 +256,8 @@ makeTestAsync(
 );
 
 makeTestAsync(
-  ~name=
-    "Page.cookies(): If no URLs are specified, this method returns cookies for the current page URL. If URLs are specified, only cookies for those URLs are returned.",
-  ~getData=
-    browser =>
-      Js.Promise.(
-        Puppeteer.Browser.newPage(browser, ())
-        |> then_(page => Puppeteer.Page.cookies(page, [||]))
-      ),
+  ~name="Page.coverage",
+  ~getData=browser => Puppeteer.Browser.newPage(browser, ()),
   ~assertData=
-    cookies => expect(cookies) |> toHaveLength(0) |> Js.Promise.resolve
+    page => expect(page##coverage) |> ExpectJs.toBeTruthy |> Js.Promise.resolve
 );

@@ -90,8 +90,9 @@ module Target = {
 module Page = {
   type t = {
     .
-    touchscreen: Touchscreen.t,
-    tracing: Tracing.t
+    "touchscreen": Touchscreen.t,
+    "tracing": Tracing.t,
+    "coverage": Coverage.t
   };
   type tagOptions = {
     .
@@ -164,11 +165,13 @@ module Page = {
   external authenticate :
     (
       t,
-      Js.Null.t({
-        .
-        "username": string,
-        "password": string
-      })
+      Js.Null.t(
+        {
+          .
+          "username": string,
+          "password": string
+        }
+      )
     ) =>
     Js.Promise.t(unit) =
     "";
@@ -178,12 +181,14 @@ module Page = {
     (
       t,
       string,
-      Js.undefined({
-        .
-        "button": string,
-        "clickCount": int,
-        "delay": int
-      })
+      Js.undefined(
+        {
+          .
+          "button": string,
+          "clickCount": int,
+          "delay": int
+        }
+      )
     ) =>
     Js.Promise.t(unit) =
     "";
@@ -191,7 +196,6 @@ module Page = {
   [@bs.send] external content : (t, unit) => Js.Promise.t(string) = "";
   [@bs.send] [@bs.splice]
   external cookies : (t, array(string)) => Js.Promise.t(array(cookie)) = "";
-  [@bs.send] external coverage : (t, unit) => Coverage.t = "";
   [@bs.send] [@bs.splice]
   external deleteCookie : (t, array(cookie)) => Js.Promise.t(unit) = "";
   [@bs.send]
