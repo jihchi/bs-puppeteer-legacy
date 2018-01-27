@@ -213,11 +213,13 @@ module Page = {
   [@bs.send] external emulateMedia : (t, string) => Js.Promise.t(unit) = "";
   [@bs.send]
   external evaluate :
-    (t, unit => Js.Promise.t(Js.Json.t), [@bs.splice] array(args)) => Js.Promise.t(Js.Json.t) =
+    (t, unit => Js.Promise.t(Js.Json.t), [@bs.splice] array(args)) =>
+    Js.Promise.t(Js.Json.t) =
     "";
   [@bs.send]
   external evaluateHandle :
-    (t, unit => unit, [@bs.splice] array(args)) => Js.Promise.t(JSHandle.t) =
+    (t, unit => Js.Promise.t(JSHandle.t), [@bs.splice] array(args)) =>
+    Js.Promise.t(JSHandle.t) =
     "";
   [@bs.send]
   external evaluateOnNewDocument :

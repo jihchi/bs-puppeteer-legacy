@@ -349,3 +349,22 @@ makeTestAsync(
       |> toBe("ok")
       |> Js.Promise.resolve
 );
+
+makeTestAsync(
+  ~name=
+    "Page.evaluateHandle(): If the function, passed to the page.evaluateHandle, returns a Promise, then page.evaluateHandle would wait for the promise to resolve and return its value.",
+  ~getData=
+    browser =>
+      Js.Promise.(
+        Puppeteer.Browser.newPage(browser, ())
+        |> then_(page => {
+             let eval = [%raw
+               {| function () { return Promise.resolve(document); } |}
+             ];
+             Puppeteer.Page.evaluateHandle(page, eval, [||]);
+           })
+      ),
+  ~assertData=
+    jsHandler =>
+      jsHandler |> expect |> ExpectJs.toBeTruthy |> Js.Promise.resolve
+);
