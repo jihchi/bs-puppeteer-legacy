@@ -261,3 +261,15 @@ makeTestAsync(
   ~assertData=
     page => expect(page##coverage) |> ExpectJs.toBeTruthy |> Js.Promise.resolve
 );
+
+makeTestAsync(
+  ~name=
+    "Page.deleteCookie()",
+  ~getData=
+    browser =>
+      Js.Promise.(
+        Puppeteer.Browser.newPage(browser, ())
+        |> then_(page => Puppeteer.Page.deleteCookie(page, [||]))
+      ),
+  ~assertData=() => pass |> Js.Promise.resolve
+);
