@@ -168,17 +168,23 @@ makeTestAsync(
       Js.Promise.(
         Puppeteer.Browser.newPage(browser, ())
         |> then_(page =>
-             Puppeteer.Page.addScriptTag(
-               ~url=
-                 "https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js",
-               page
-             )
+             all2((
+               Puppeteer.Page.addScriptTag(
+                 ~url=
+                   "https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js",
+                 page
+               ),
+               resolve(page)
+             ))
            )
+        |> then_(((_elementHandle, page)) => Puppeteer.Page.content(page, ()))
       ),
   ~assertData=
-    elementHandle =>
-      expect(elementHandle##toString())
-      |> toContainString("JSHandle@node")
+    content =>
+      expect(content)
+      |> toBe(
+           "<html><head><script src=\"https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js\"></script></head><body></body></html>"
+         )
       |> Js.Promise.resolve
 );
 
@@ -190,16 +196,38 @@ makeTestAsync(
       Js.Promise.(
         Puppeteer.Browser.newPage(browser, ())
         |> then_(page =>
-             Puppeteer.Page.addStyleTag(
-               ~url=
-                 "https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0/css/bootstrap.min.css",
-               page
+             all2((
+               Puppeteer.Page.addStyleTag(
+                 ~url=
+                   "https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0/css/bootstrap.min.css",
+                 page
+               ),
+               resolve(page)
+             ))
+           )
+        |> then_(((_elementHandle, page)) => Puppeteer.Page.content(page, ()))
+      ),
+  ~assertData=
+    content =>
+      expect(content)
+      |> toBe(
+           "<html><head><link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0/css/bootstrap.min.css\"></head><body></body></html>"
+         )
+      |> Js.Promise.resolve
+);
+
+makeTestAsync(
+  ~name="Page.authenticate(): Provide credentials for http authentication.",
+  ~getData=
+    browser =>
+      Js.Promise.(
+        Puppeteer.Browser.newPage(browser, ())
+        |> then_(page =>
+             Puppeteer.Page.authenticate(
+               page,
+               Js.Null.return({"username": "foo", "password": "bar"})
              )
            )
       ),
-  ~assertData=
-    elementHandle =>
-      expect(elementHandle##toString())
-      |> toContainString("JSHandle@node")
-      |> Js.Promise.resolve
+  ~assertData=() => pass |> Js.Promise.resolve
 );

@@ -164,10 +164,10 @@ module Page = {
   external authenticate :
     (
       t,
-      Js.Nullable.t({
+      Js.Null.t({
         .
-        username: string,
-        password: string
+        "username": string,
+        "password": string
       })
     ) =>
     Js.Promise.t(unit) =
