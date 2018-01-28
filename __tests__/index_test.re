@@ -33,16 +33,44 @@ test(
   |> toContainString("chromium")
 );
 
-makeTestAsync(
-  ~name="Browser.wsEndpoint(): Browser websocket url.",
-  ~getData=
-    browser => Js.Promise.resolve(Puppeteer.Browser.wsEndpoint(browser, ())),
-  ~assertData=
-    wsEndpoint =>
-      expect(wsEndpoint)
-      |> toContainString("ws://127.0.0.1:")
-      |> Js.Promise.resolve
-);
+describe("Browser", () => {
+  let browser = ref(Puppeteer.Browser.makeNull());
+  beforeAllPromise(() =>
+    Js.Promise.(
+      Puppeteer.launch(puppeteer)
+      |> then_(res => {
+           browser := res;
+           resolve();
+         })
+    )
+  );
+  test("wsEndpoint(): Browser websocket url.", () =>
+    Puppeteer.Browser.wsEndpoint(browser^, ())
+    |> expect
+    |> toContainString("ws://127.0.0.1:")
+  );
+  testPromise("userAgent(): Browser's original user agent.", () =>
+    Js.Promise.(
+      Puppeteer.Browser.userAgent(browser^, ())
+        |> then_(userAgent => userAgent
+          |> expect
+          |> toContainString("HeadlessChrome")
+          |> resolve
+        )
+      )
+  );
+  testPromise("version(): For headless Chromium, this is similar to HeadlessChrome/61.0.3153.0. For non-headless, this is similar to Chrome/61.0.3153.0.", () =>
+    Js.Promise.(
+      Puppeteer.Browser.version(browser^, ())
+        |> then_(version => version
+          |> expect
+          |> toContainString("HeadlessChrome")
+          |> resolve
+        )
+      )
+  );
+  afterAllPromise(() => Puppeteer.Browser.close(browser^, ()));
+});
 
 makeTestAsync(
   ~name="Browser.newPage(): Get a new Page object.",

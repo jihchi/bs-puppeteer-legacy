@@ -435,6 +435,7 @@ module Page = {
 
 module Browser = {
   type t;
+  external makeNull : unit => t = "%identity";
   [@bs.send.pipe : t]
   external on :
     (
