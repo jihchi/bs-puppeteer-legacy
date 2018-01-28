@@ -4,37 +4,18 @@ open Expect;
 
 let puppeteer = Puppeteer.puppeteer;
 
-let makeTestAsync = (~name, ~getData, ~assertData) =>
-  testPromise(name, () =>
-    Js.Promise.(
-      Puppeteer.launch(puppeteer)
-      |> then_(browser => all2((resolve(browser), getData(browser))))
-      |> then_(res => {
-           let (browser, data) = res;
-           all2((Puppeteer.Browser.close(browser, ()), resolve(data)));
-         })
-      |> then_(res => {
-           let (_, data) = res;
-           assertData(data);
-         })
-    )
+describe("Puppeteer", () => {
+  test("defaultArgs()", () =>
+    expect(Puppeteer.defaultArgs(puppeteer, ())) |> toHaveLength(17)
   );
-
-test(
-  "Puppeteer.defaultArgs(): The default flags that Chromium will be launched with.",
-  () =>
-  expect(Puppeteer.defaultArgs(puppeteer, ())) |> toHaveLength(17)
-);
-
-test(
-  "Puppeteer.executablePath(): A path where Puppeteer expects to find bundled Chromium.",
-  () =>
-  expect(Puppeteer.executablePath(puppeteer, ()))
-  |> toContainString("chromium")
-);
+  test("executablePath()", () =>
+    expect(Puppeteer.executablePath(puppeteer, ()))
+    |> toContainString("chromium")
+  );
+});
 
 describe("Browser", () => {
-  let browser = ref(Puppeteer.Browser.makeNull());
+  let browser = ref(Puppeteer.Browser.empty());
   beforeAllPromise(() =>
     Js.Promise.(
       Puppeteer.launch(puppeteer)
@@ -44,355 +25,278 @@ describe("Browser", () => {
          })
     )
   );
-  test("wsEndpoint(): Browser websocket url.", () =>
+  test("wsEndpoint()", () =>
     Puppeteer.Browser.wsEndpoint(browser^, ())
     |> expect
     |> toContainString("ws://127.0.0.1:")
   );
-  testPromise("userAgent(): Browser's original user agent.", () =>
+  testPromise("userAgent()", () =>
     Js.Promise.(
       Puppeteer.Browser.userAgent(browser^, ())
-        |> then_(userAgent => userAgent
-          |> expect
-          |> toContainString("HeadlessChrome")
-          |> resolve
-        )
-      )
+      |> then_(userAgent =>
+           userAgent |> expect |> toContainString("HeadlessChrome") |> resolve
+         )
+    )
   );
-  testPromise("version(): For headless Chromium, this is similar to HeadlessChrome/61.0.3153.0. For non-headless, this is similar to Chrome/61.0.3153.0.", () =>
+  testPromise("version()", () =>
     Js.Promise.(
       Puppeteer.Browser.version(browser^, ())
-        |> then_(version => version
-          |> expect
-          |> toContainString("HeadlessChrome")
-          |> resolve
-        )
-      )
+      |> then_(version =>
+           version |> expect |> toContainString("HeadlessChrome") |> resolve
+         )
+    )
   );
   afterAllPromise(() => Puppeteer.Browser.close(browser^, ()));
 });
 
-makeTestAsync(
-  ~name="Browser.newPage(): Get a new Page object.",
-  ~getData=
-    browser => Js.Promise.resolve(Puppeteer.Browser.newPage(browser, ())),
-  ~assertData=page => expect(page) |> ExpectJs.toBeTruthy |> Js.Promise.resolve
-);
-
-makeTestAsync(
-  ~name=
-    "Page.$(): The method runs document.querySelector within the page. (FAIL)",
-  ~getData=
-    browser =>
-      Js.Promise.(
-        Puppeteer.Browser.newPage(browser, ())
-        |> then_(page => Puppeteer.Page.dollar(page, "#does-not-exists"))
-      ),
-  ~assertData=
-    elementHandle =>
-      expect(elementHandle) |> ExpectJs.toBeFalsy |> Js.Promise.resolve
-);
-
-makeTestAsync(
-  ~name="Page.$(): The method runs document.querySelector within the page.",
-  ~getData=
-    browser =>
-      Js.Promise.(
-        Puppeteer.Browser.newPage(browser, ())
-        |> then_(page => Puppeteer.Page.dollar(page, "body"))
-      ),
-  ~assertData=
-    elementHandle =>
-      expect(elementHandle) |> ExpectJs.toBeTruthy |> Js.Promise.resolve
-);
-
-makeTestAsync(
-  ~name=
-    "Page.content(): gets the full HTML contents of the page, including the doctype.",
-  ~getData=
-    browser =>
-      Js.Promise.(
-        Puppeteer.Browser.newPage(browser, ())
-        |> then_(page => Puppeteer.Page.content(page, ()))
-      ),
-  ~assertData=
-    content =>
-      expect(content)
-      |> ExpectJs.toBe("<html><head></head><body></body></html>")
-      |> Js.Promise.resolve
-);
-
-makeTestAsync(
-  ~name=
-    "Page.$$(): The method runs document.querySelectorAll within the page.",
-  ~getData=
-    browser =>
-      Js.Promise.(
-        Puppeteer.Browser.newPage(browser, ())
-        |> then_(page => Puppeteer.Page.dollarDollar(page, "html,body"))
-      ),
-  ~assertData=
-    elementHandles =>
-      expect(elementHandles) |> ExpectJs.toHaveLength(2) |> Js.Promise.resolve
-);
-
-makeTestAsync(
-  ~name=
-    "Page.$$eval(): This method runs document.querySelectorAll within the page and passes it as the first argument to pageFunction.",
-  ~getData=
-    browser =>
-      Js.Promise.(
-        Puppeteer.Browser.newPage(browser, ())
-        |> then_(page => {
-             let eval = [%raw
-               {| function (elements) { return elements.length; } |}
-             ];
-             Puppeteer.Page.dollarDollarEval(page, "html,body", eval, [||]);
-           })
-      ),
-  ~assertData=
-    serializable => expect(serializable) |> toBe(2) |> Js.Promise.resolve
-);
-
-makeTestAsync(
-  ~name=
-    "Page.$eval(): This method runs document.querySelector within the page and passes it as the first argument to pageFunction.",
-  ~getData=
-    browser =>
-      Js.Promise.(
-        Puppeteer.Browser.newPage(browser, ())
-        |> then_(page => {
-             let eval = [%raw
-               {| function (element) { return element.outerHTML; } |}
-             ];
-             Puppeteer.Page.dollarEval(page, "html", eval, [||]);
-           })
-      ),
-  ~assertData=
-    serializable =>
-      expect(serializable)
-      |> toBe("<html><head></head><body></body></html>")
-      |> Js.Promise.resolve
-);
-
-makeTestAsync(
-  ~name="Page.$x(): The method evluates the XPath expression.",
-  ~getData=
-    browser =>
-      Js.Promise.(
-        Puppeteer.Browser.newPage(browser, ())
-        |> then_(page => Puppeteer.Page.dollarX(page, "/html/body"))
-      ),
-  ~assertData=
-    elementHandles =>
-      expect(elementHandles) |> toHaveLength(1) |> Js.Promise.resolve
-);
-
-makeTestAsync(
-  ~name=
-    "Page.addScriptTag(): Adds a <script> tag into the page with the desired url or content.",
-  ~getData=
-    browser =>
-      Js.Promise.(
-        Puppeteer.Browser.newPage(browser, ())
-        |> then_(page =>
-             all2((
-               Puppeteer.Page.addScriptTag(
-                 ~url=
-                   "https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js",
-                 page
-               ),
-               resolve(page)
-             ))
-           )
-        |> then_(((_elementHandle, page)) => Puppeteer.Page.content(page, ()))
-      ),
-  ~assertData=
-    content =>
-      expect(content)
-      |> toBe(
-           "<html><head><script src=\"https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js\"></script></head><body></body></html>"
-         )
-      |> Js.Promise.resolve
-);
-
-makeTestAsync(
-  ~name=
-    "Page.addStyleTag(): Adds a <link rel=\"stylesheet\"> tag into the page with the desired url or a <style type=\"text/css\"> tag with the content.",
-  ~getData=
-    browser =>
-      Js.Promise.(
-        Puppeteer.Browser.newPage(browser, ())
-        |> then_(page =>
-             all2((
-               Puppeteer.Page.addStyleTag(
-                 ~url=
-                   "https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0/css/bootstrap.min.css",
-                 page
-               ),
-               resolve(page)
-             ))
-           )
-        |> then_(((_elementHandle, page)) => Puppeteer.Page.content(page, ()))
-      ),
-  ~assertData=
-    content =>
-      expect(content)
-      |> toBe(
-           "<html><head><link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0/css/bootstrap.min.css\"></head><body></body></html>"
-         )
-      |> Js.Promise.resolve
-);
-
-makeTestAsync(
-  ~name="Page.authenticate(): Provide credentials for http authentication.",
-  ~getData=
-    browser =>
-      Js.Promise.(
-        Puppeteer.Browser.newPage(browser, ())
-        |> then_(page =>
-             Puppeteer.Page.authenticate(
-               page,
-               Js.Null.return({"username": "foo", "password": "bar"})
-             )
-           )
-      ),
-  ~assertData=() => pass |> Js.Promise.resolve
-);
-
-makeTestAsync(
-  ~name="Page.bringToFront(): Brings page to front (activates tab).",
-  ~getData=
-    browser =>
-      Js.Promise.(
-        Puppeteer.Browser.newPage(browser, ())
-        |> then_(page => Puppeteer.Page.bringToFront(page, ()))
-      ),
-  ~assertData=() => pass |> Js.Promise.resolve
-);
-
-makeTestAsync(
-  ~name=
-    "Page.click(): This method fetches an element with selector, scrolls it into view if needed, and then uses page.mouse to click in the center of the element. If there's no element matching selector, the method throws an error.",
-  ~getData=
-    browser =>
-      Js.Promise.(
-        Puppeteer.Browser.newPage(browser, ())
-        |> then_(page => Puppeteer.Page.click(page, "body", Js.undefined))
-      ),
-  ~assertData=() => pass |> Js.Promise.resolve
-);
-
-makeTestAsync(
-  ~name="Page.coverage",
-  ~getData=browser => Puppeteer.Browser.newPage(browser, ()),
-  ~assertData=
-    page => expect(page##coverage) |> ExpectJs.toBeTruthy |> Js.Promise.resolve
-);
-
-makeTestAsync(
-  ~name="Page.deleteCookie()",
-  ~getData=
-    browser =>
-      Js.Promise.(
-        Puppeteer.Browser.newPage(browser, ())
-        |> then_(page => Puppeteer.Page.deleteCookie(page, [||]))
-      ),
-  ~assertData=() => pass |> Js.Promise.resolve
-);
-
-makeTestAsync(
-  ~name="Page.emulate(): Emulates given device metrics and user agent.",
-  ~getData=
-    browser =>
-      Js.Promise.(
-        Puppeteer.Browser.newPage(browser, ())
-        |> then_(page =>
-             all2((
-               Puppeteer.Page.emulate(
-                 page,
-                 {
-                   "viewport": {
-                     "width": 320,
-                     "height": 480,
-                     "deviceScaleFactor": 2,
-                     "isMobile": Js.true_,
-                     "hasTouch": Js.true_,
-                     "isLandscape": Js.true_
-                   },
-                   "userAgent": ""
-                 }
-               ),
-               resolve(page)
-             ))
-           )
-      ),
-  ~assertData=
-    (((), page)) =>
-      Puppeteer.Page.viewport(page, ())
-      |> expect
-      |> ExpectJs.toMatchObject({
-           "width": 320,
-           "height": 480,
-           "deviceScaleFactor": 2,
-           "isMobile": Js.true_,
-           "hasTouch": Js.true_,
-           "isLandscape": Js.true_
+describe("Page", () => {
+  let browser = ref(Puppeteer.Browser.empty());
+  let page = ref(Puppeteer.Page.empty());
+  beforeAllPromise(() =>
+    Js.Promise.(
+      Puppeteer.launch(puppeteer)
+      |> then_(res => {
+           browser := res;
+           Puppeteer.Browser.newPage(browser^, ());
          })
-      |> Js.Promise.resolve
-);
-
-makeTestAsync(
-  ~name=
-    "Page.emulateMedia(): Changes the CSS media type of the page. The only allowed values are 'screen', 'print' and null. Passing null disables media emulation.",
-  ~getData=
-    browser =>
-      Js.Promise.(
-        Puppeteer.Browser.newPage(browser, ())
-        |> then_(page => Puppeteer.Page.emulateMedia(page, "print"))
-      ),
-  ~assertData=() => pass |> Js.Promise.resolve
-);
-
-makeTestAsync(
-  ~name=
-    "Page.evaluate(): If the function, passed to the page.evaluate, returns a Promise, then page.evaluate would wait for the promise to resolve and return its value.",
-  ~getData=
-    browser =>
-      Js.Promise.(
-        Puppeteer.Browser.newPage(browser, ())
-        |> then_(page => {
-             let eval = [%raw
-               {| function () { return Promise.resolve("ok"); } |}
-             ];
-             Puppeteer.Page.evaluate(page, eval, [||]);
-           })
-      ),
-  ~assertData=
-    serializable =>
-      serializable
-      |> Js.Json.decodeString
-      |> Js.Option.getWithDefault("")
-      |> expect
-      |> toBe("ok")
-      |> Js.Promise.resolve
-);
-
-makeTestAsync(
-  ~name=
-    "Page.evaluateHandle(): If the function, passed to the page.evaluateHandle, returns a Promise, then page.evaluateHandle would wait for the promise to resolve and return its value.",
-  ~getData=
-    browser =>
-      Js.Promise.(
-        Puppeteer.Browser.newPage(browser, ())
-        |> then_(page => {
-             let eval = [%raw
-               {| function () { return Promise.resolve(document); } |}
-             ];
-             Puppeteer.Page.evaluateHandle(page, eval, [||]);
-           })
-      ),
-  ~assertData=
-    jsHandler =>
-      jsHandler |> expect |> ExpectJs.toBeTruthy |> Js.Promise.resolve
-);
+      |> then_(res => {
+           page := res;
+           resolve();
+         })
+    )
+  );
+  testPromise("$()", () =>
+    Js.Promise.(
+      Puppeteer.Page.dollar(page^, "body")
+      |> then_(elementHandle =>
+           elementHandle |> expect |> ExpectJs.toBeTruthy |> Js.Promise.resolve
+         )
+    )
+  );
+  testPromise("content()", () =>
+    Js.Promise.(
+      Puppeteer.Page.content(page^, ())
+      |> then_(content =>
+           expect(content)
+           |> ExpectJs.toBe("<html><head></head><body></body></html>")
+           |> Js.Promise.resolve
+         )
+    )
+  );
+  testPromise(
+    "$$()", () =>
+    Js.Promise.(
+      Puppeteer.Page.dollarDollar(page^, "html,body")
+      |> then_(elementHandles =>
+           expect(elementHandles)
+           |> ExpectJs.toHaveLength(2)
+           |> Js.Promise.resolve
+         )
+    )
+  );
+  testPromise(
+    "$$eval()",
+    () =>
+    Js.Promise.(
+      {
+        let eval = [%raw {| function (elements) { return elements.length; } |}];
+        Puppeteer.Page.dollarDollarEval(page^, "html,body", eval, [||]);
+      }
+      |> then_(serializable =>
+           expect(serializable) |> toBe(2) |> Js.Promise.resolve
+         )
+    )
+  );
+  testPromise(
+    "$eval()",
+    () =>
+    Js.Promise.(
+      {
+        let eval = [%raw
+          {| function (element) { return element.outerHTML; } |}
+        ];
+        Puppeteer.Page.dollarEval(page^, "html", eval, [||]);
+      }
+      |> then_(serializable =>
+           expect(serializable)
+           |> toBe("<html><head></head><body></body></html>")
+           |> Js.Promise.resolve
+         )
+    )
+  );
+  testPromise("$x()", () =>
+    Js.Promise.(
+      Puppeteer.Page.dollarX(page^, "/html/body")
+      |> then_(elementHandles =>
+           expect(elementHandles) |> toHaveLength(1) |> Js.Promise.resolve
+         )
+    )
+  );
+  testPromise(
+    "addScriptTag()",
+    () =>
+    Js.Promise.(
+      Puppeteer.Browser.newPage(browser^, ())
+      |> then_(page =>
+           all2((
+             Puppeteer.Page.addScriptTag(
+               ~url=
+                 "https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js",
+               page
+             ),
+             resolve(page)
+           ))
+         )
+      |> then_(((_elementHandle, page)) =>
+           all2((Puppeteer.Page.content(page, ()), resolve(page)))
+         )
+      |> then_(((content, page)) =>
+           all2((Puppeteer.Page.close(page, ()), resolve(content)))
+         )
+      |> then_(((_nothing, content)) =>
+           expect(content)
+           |> toBe(
+                "<html><head><script src=\"https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js\"></script></head><body></body></html>"
+              )
+           |> Js.Promise.resolve
+         )
+    )
+  );
+  testPromise(
+    "addStyleTag()",
+    () =>
+    Js.Promise.(
+      Puppeteer.Browser.newPage(browser^, ())
+      |> then_(page =>
+           all2((
+             Puppeteer.Page.addStyleTag(
+               ~url=
+                 "https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0/css/bootstrap.min.css",
+               page
+             ),
+             resolve(page)
+           ))
+         )
+      |> then_(((_elementHandle, page)) =>
+           all2((Puppeteer.Page.content(page, ()), resolve(page)))
+         )
+      |> then_(((content, page)) =>
+           all2((Puppeteer.Page.close(page, ()), resolve(content)))
+         )
+      |> then_(((_nothing, content)) =>
+           expect(content)
+           |> toBe(
+                "<html><head><link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0/css/bootstrap.min.css\"></head><body></body></html>"
+              )
+           |> Js.Promise.resolve
+         )
+    )
+  );
+  testPromise(
+    "authenticate()", () =>
+    Js.Promise.(
+      Puppeteer.Page.authenticate(
+        page^,
+        Js.Null.return({"username": "foo", "password": "bar"})
+      )
+      |> then_(() => pass |> Js.Promise.resolve)
+    )
+  );
+  testPromise(
+    "click()",
+    () =>
+    Js.Promise.(
+      Puppeteer.Page.click(page^, "body", Js.undefined)
+      |> then_(() => pass |> Js.Promise.resolve)
+    )
+  );
+  test("coverage", () => {
+    let p = page^;
+    expect(p##coverage) |> ExpectJs.toBeTruthy;
+  });
+  testPromise("deleteCookie()", () =>
+    Js.Promise.(
+      Puppeteer.Page.deleteCookie(page^, [||])
+      |> then_(() => pass |> Js.Promise.resolve)
+    )
+  );
+  testPromise(
+    "emulate()", () =>
+    Js.Promise.(
+      Puppeteer.Page.emulate(
+        page^,
+        {
+          "viewport": {
+            "width": 320,
+            "height": 480,
+            "deviceScaleFactor": 2,
+            "isMobile": Js.true_,
+            "hasTouch": Js.true_,
+            "isLandscape": Js.true_
+          },
+          "userAgent": ""
+        }
+      )
+      |> then_(() =>
+           Puppeteer.Page.viewport(page^, ())
+           |> expect
+           |> ExpectJs.toMatchObject({
+                "width": 320,
+                "height": 480,
+                "deviceScaleFactor": 2,
+                "isMobile": Js.true_,
+                "hasTouch": Js.true_,
+                "isLandscape": Js.true_
+              })
+           |> Js.Promise.resolve
+         )
+    )
+  );
+  testPromise(
+    "emulateMedia()",
+    () =>
+    Js.Promise.(
+      Puppeteer.Page.emulateMedia(page^, "print")
+      |> then_(() => pass |> Js.Promise.resolve)
+    )
+  );
+  testPromise(
+    "evaluate()",
+    () =>
+    Js.Promise.(
+      {
+        let eval = [%raw {| function () { return Promise.resolve("ok"); } |}];
+        Puppeteer.Page.evaluate(page^, eval, [||]);
+      }
+      |> then_(serializable =>
+           serializable
+           |> Js.Json.decodeString
+           |> Js.Option.getWithDefault("")
+           |> expect
+           |> toBe("ok")
+           |> Js.Promise.resolve
+         )
+    )
+  );
+  testPromise(
+    "evaluateHandle()",
+    () =>
+    Js.Promise.(
+      {
+        let eval = [%raw
+          {| function () { return Promise.resolve(document); } |}
+        ];
+        Puppeteer.Page.evaluateHandle(page^, eval, [||]);
+      }
+      |> then_(jsHandler =>
+           jsHandler |> expect |> ExpectJs.toBeTruthy |> Js.Promise.resolve
+         )
+    )
+  );
+  afterAllPromise(() =>
+    Js.Promise.(
+      Puppeteer.Page.close(page^, ())
+      |> then_(() => Puppeteer.Browser.close(browser^, ()))
+    )
+  );
+});

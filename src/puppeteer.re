@@ -100,6 +100,7 @@ module Page = {
     "path": Js.undefined(string),
     "url": string
   };
+  external empty : unit => t = "%identity";
   [@bs.obj]
   external makeTagOptions :
     (~url: string, ~path: string=?, ~content: string=?, unit) => _ =
@@ -435,7 +436,7 @@ module Page = {
 
 module Browser = {
   type t;
-  external makeNull : unit => t = "%identity";
+  external empty : unit => t = "%identity";
   [@bs.send.pipe : t]
   external on :
     (
