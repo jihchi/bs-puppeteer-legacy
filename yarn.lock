@@ -10,12 +10,6 @@
     esutils "^2.0.2"
     js-tokens "^3.0.0"
 
-"@glennsl/bs-jest@^0.3.3":
-  version "0.3.3"
-  resolved "https://registry.yarnpkg.com/@glennsl/bs-jest/-/bs-jest-0.3.3.tgz#711270acdefcb83983bb01394963e1a578044354"
-  dependencies:
-    jest "^22.0.4"
-
 "@glennsl/bs-jest@https://github.com/glennsl/bs-jest.git#4f38070029253e772470d9f5aa59e69c59bf43bf":
   version "0.3.3"
   resolved "https://github.com/glennsl/bs-jest.git#4f38070029253e772470d9f5aa59e69c59bf43bf"
