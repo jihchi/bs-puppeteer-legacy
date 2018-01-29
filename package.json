@@ -26,7 +26,7 @@
   "author": "Jih-Chi, Lee <achi@987.tw>",
   "license": "MIT",
   "devDependencies": {
-    "@glennsl/bs-jest": "^0.3.3",
+    "@glennsl/bs-jest": "https://github.com/glennsl/bs-jest.git#4f38070029253e772470d9f5aa59e69c59bf43bf",
     "puppeteer": "^1.0.0"
   }
 }

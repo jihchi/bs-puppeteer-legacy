@@ -16,6 +16,12 @@
   dependencies:
     jest "^22.0.4"
 
+"@glennsl/bs-jest@https://github.com/glennsl/bs-jest.git#4f38070029253e772470d9f5aa59e69c59bf43bf":
+  version "0.3.3"
+  resolved "https://github.com/glennsl/bs-jest.git#4f38070029253e772470d9f5aa59e69c59bf43bf"
+  dependencies:
+    jest "^22.0.4"
+
 abab@^1.0.4:
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/abab/-/abab-1.0.4.tgz#5faad9c2c07f60dd76770f71cf025b62a63cfd4e"
