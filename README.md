@@ -1,3 +1,9 @@
+---
+
+# This project is discontinued. Please go to [bs-puppeteer/bs-puppeteer](https://github.com/bs-puppeteer/bs-puppeteer) instead.
+
+--- 
+
 # bs-puppeteer
 
 BuckleScript bindings to the GoogleChrome/puppeteer (Headless Chrome Node API)
